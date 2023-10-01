@@ -22,6 +22,16 @@ head(df_train)
 df_test<- read.csv("test.csv")
 head(df_test)
 
-
 #Analizando la estructura de la base de datos
-glimpse(df)
+glimpse(df_train)
+
+##Verificación de NAs
+
+sapply(df_train, function(x) sum(is.na(x)))
+
+df_train %>%
+  count(property_type)
+
+sapply(df_test, function(x) sum(is.na(x)))
+
+
