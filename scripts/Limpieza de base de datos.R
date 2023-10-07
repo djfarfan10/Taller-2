@@ -76,11 +76,37 @@ df_train_1 <- df_train_1 %>%
 df_train_1 <- df_train_1 %>%
   mutate(description = str_trim(gsub("\\s+", " ", description)))
 
-#Creación de variable dicotoma para parqueaderos o garajes
+#Creación de variable dicotoma para parqueaderos, garajes o estacionamiento
 
 df_train_1 <- df_train_1 %>%
-  mutate(parqueadero = as.numeric(grepl("parqueadero?|garaje?", df_train_1$description)))
+  mutate(parqueadero = as.numeric(grepl("parqueadero?|garaje|estacionamiento?", df_train_1$description)))
 
 df_train_1 %>%
   count(parqueadero)
+
+#Creación de variable de área desde la descripción
+
+area_total <- str_extract(df_train_1$description, "[0-9]{2,} m[a-z0-9]+")
+head(area_total)
+
+df_train_1 <- df_train_1 %>% 
+  mutate(area_tamano=str_extract(area_total,"[0-9]{2,}"))
+
+df_train_1$area_tamano <- as.numeric(df_train_1$area_tamano)
+library (skimr)
+require(skimr)
+skim(df_train_1)
+
+# Se escoge el valor máximo de las tres variables que tienen área asociada y se crea una sola para minimizar la cantidad de nan de la variable
+
+df_train_1 <- df_train_1 %>% 
+  mutate(area_def=pmax(df_train_1$surface_covered,df_train_1$surface_total,df_train_1$area_tamano,na.rm = TRUE)) 
+
+sapply(df_train_1, function(x) sum(is.na(x)))
+
+
+## Creación variable de baños
+
+df_train_1 <- df_train_1 %>%
+  mutate(num_banos= str_extract(description, "(\\w+|\\d+) (\\w+|\\d+) bano|banos|bao|baos  (\\w+|\\d+) (\\w+|\\d+)"))
 
