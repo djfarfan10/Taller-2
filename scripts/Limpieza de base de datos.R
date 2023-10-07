@@ -89,42 +89,9 @@ df_train_1 %>%
 df_train_1 <- df_train_1 %>%
   mutate(area_description= str_extract(description, "(\\w+|\\d+) (\\w+|\\d+) metros (\\w+|\\d+) (\\w+|\\d+)"))
 
-# Crea una cadena de ejemplo que contenga la información del área
-texto <- "El inmueble tiene una superficie de 120 m2 y otro de 150 metros cuadrados."
 
-# Define una función para extraer el área en metros cuadrados
+## Creación variable de baños
 
-extraer_area <- function(texto) {
-  # Busca un número seguido de una de las palabras clave
-  patron <- "\\b(\\d+\\.?\\d*)\\s*(mts|ms|m2|metro|metros)\\b"
-  
-  # Encuentra todas las coincidencias en el texto
-  coincidencias <- gregexpr(patron, texto, ignore.case = TRUE)
-  
-  # Extrae las coincidencias y las unidades
-  areas <- regmatches(texto, coincidencias)
-  
-  # Inicializa un vector para almacenar las áreas en metros cuadrados
-  areas_en_metros_cuadrados <- numeric(length(areas))
-  
-  # Convierte las áreas a metros cuadrados
-  for (i in 1:length(areas)) {
-    area_texto <- areas[[i]][1]
-    unidad <- tolower(areas[[i]][2])
-    
-    if (unidad == "mr" || unidad == "mts" || unidad == "ms") {
-      areas_en_metros_cuadrados[i] <- as.numeric(area_texto)
-    } else if (unidad == "m2" || unidad == "metro" || unidad == "metros") {
-      areas_en_metros_cuadrados[i] <- as.numeric(area_texto)
-    }
-  }
-  
-  return(areas_en_metros_cuadrados)
-}
-
-# Llama a la función para obtener las áreas en metros cuadrados
-areas <- extraer_area(texto)
-
-# Imprime las áreas
-print(areas)
+df_train_1 <- df_train_1 %>%
+  mutate(num_banos= str_extract(description, "(\\w+|\\d+) (\\w+|\\d+) bano|banos|bao|baos  (\\w+|\\d+) (\\w+|\\d+)"))
 
