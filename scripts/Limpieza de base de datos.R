@@ -13,14 +13,20 @@ p_load(tidyverse, # Manipular dataframes
        osmdata, # Get OSM's data 
        tidymodels) #para modelos de ML
 
+p_load(glmnet,skimr)
+
 ##Establecimiento del directorio de trabajo y cargue de base de datos
 
-setwd("d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores")
+setwd("C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores")
 df_train<- read.csv("train.csv")
 head(df_train)
 
 df_test<- read.csv("test.csv")
 head(df_test)
+
+
+####### Limpieza de base de datos para el modelo de entrenamiento #######
+
 
 #Analizando la estructura de la base de datos
 glimpse(df_train)
