@@ -4,16 +4,17 @@
 
 library (pacman)
 p_load(tidyverse, # Manipular dataframes
-       rio, # Import data easily
+       rio, # Importar datos fácilmente
        plotly, # Gráficos interactivos
        leaflet, # Mapas interactivos
-       rgeos, # Calcular centroides de un poligono
-       tmaptools, # geocode_OSM()
+       rgeos, # Calcular centroides de un polígono
+       units, # unidades
        sf, # Leer/escribir/manipular datos espaciales
-       osmdata, # Get OSM's data 
-       tidymodels) #para modelos de ML
-
-p_load(glmnet,skimr)
+       osmdata, # Obtener datos de OpenStreetMap (OSM)
+       tidymodels, # Modelado de datos limpios y ordenados
+       randomForest, # Modelos de bosque aleatorio
+       rattle, # Interfaz gráfica para el modelado de datos
+       spatialsample) # Muestreo espacial para modelos de aprendizaje automático
 
 ##Establecimiento del directorio de trabajo y cargue de base de datos
 
@@ -31,13 +32,32 @@ head(df_test)
 #Analizando la estructura de la base de datos
 glimpse(df_train)
 
+df_train %>%
+  count(property_type)
+
 ##Verificación de NAs
 
 sapply(df_train, function(x) sum(is.na(x)))
 
-df_train %>%
-  count(property_type)
+## Dada la revisión , se elminan 9 entradas que no tienen description
+
+df_train_1<- df_train[!is.na(df_train$description), ]
+sapply(df_train_1, function(x) sum(is.na(x)))
 
 sapply(df_test, function(x) sum(is.na(x)))
+
+##Verificación del property_type
+
+df_train_1 <- df_train_1 %>%
+  mutate(property_type_2 = ifelse(grepl("casa", description), "casa", property_type))
+
+# Se repite el caso anterior pero ahora buscamos apartamento o apto.
+df_train_1 <- df_train_1 %>%
+  mutate(property_type_2 = ifelse(grepl("apto|apartamento", description), "apartamento", property_type_2)) %>%
+  select(-property_type)
+
+## Se verifica si se puede obtener la variable área
+
+
 
 
