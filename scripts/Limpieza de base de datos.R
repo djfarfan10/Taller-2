@@ -79,6 +79,8 @@ df_train_1 <- df_train_1 %>%
 #Creación de variable dicotoma para parqueaderos o garajes
 
 df_train_1 <- df_train_1 %>%
-  mutate(parqueadero = as.numeric(grepl("parqueadero|garaje", df_train_1$description)))
+  mutate(parqueadero = as.numeric(grepl("parqueadero?|garaje?", df_train_1$description)))
 
+df_train_1 %>%
+  count(parqueadero)
 
