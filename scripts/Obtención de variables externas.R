@@ -35,6 +35,8 @@ test_sf <- st_as_sf(test, coords = c("lon", "lat"), crs=4326)
 
 URL_TM<-"https://gis.transmilenio.gov.co/arcgis/rest/services/Troncal/consulta_estaciones_troncales/FeatureServer/1/query?outFields=*&where=1%3D1&f=geojson"
 estaciones_TM <- read_sf(URL_TM)
+save(estaciones_TM,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/estaciones_TM.Rda")
+
 
 ggplot()+
   geom_sf(data=estaciones_TM)
@@ -89,12 +91,33 @@ save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría e
 
 ################# Estratificación #############################################
 
-
+##Cargue de información de estratos
 URL_estrato<-"https://datosabiertos.bogota.gov.co/dataset/55467552-0af4-4524-a390-a2956035744e/resource/29f2d770-bd5d-4450-9e95-8737167ba12f/download/manzanaestratificacion.json"
 estratos <- read_sf(URL_estrato)
 
+save(estratos,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/estratos.Rda")
+
+#Geometría y ubicación de polígonos de estrato
+#estratos_geometria <- estratos$osm_polygons %>% 
+#  select(osm_id, name)
+
+#Centroides de los polígonos de estrato
+
+cent_estratos <- gCentroid(as(estratos$geometry, "Spatial"), byid = T)
 
 
+
+#latitud_central <- mean(train$lat)
+#longitud_central <- mean(train$lon)
+
+#leaflet() %>%
+#  addTiles() %>%
+#  setView(lng = longitud_central, lat = latitud_central, zoom = 12) %>%
+#  addPolygons(data = estratos, col = "red",weight = 10,
+#              opacity = 0.8, popup = estratos$ESTRATO) %>%
+#  addCircles(lng = cent_estratos$x, 
+#             lat = cent_estratos$y, 
+#             col = "darkblue", opacity = 0.5, radius = 1)
 
 #estratos_adj<- estratos %>% mutate(ESTRATO = replace(ESTRATO,ESTRATO==0,2))
 
