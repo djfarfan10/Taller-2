@@ -62,24 +62,39 @@ test<-test %>%
 #Verificación gráfica
 
 trainTMgraf <- ggplot(train, aes(x = distancia_TM)) +
-  geom_histogram(bins = 50, fill = "darkgreen", alpha = 0.4) +
-  labs(x = "Distancia mínima a la estación de TM en metros", y = "Cantidad",
-       title = "Distribución de la distancia a la estación de TM") +
+  geom_histogram(bins = 50, fill = "darkgreen") +
+  labs(x = "Distancia a la estación más cercana", y = "Cantidad",
+       title = "Distancia a la estación de TransMilenio",
+       subtitle = "Base de datos de entrenamiento") +
   theme_bw()
-ggplotly(trainTMgraf)
+trainTMgraf
+
+ggsave("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/view/DistanciaTM_Train.png")
 
 testTMgraf <- ggplot(test, aes(x = distancia_TM)) +
-  geom_histogram(bins = 50, fill = "darkgreen", alpha = 0.4) +
-  labs(x = "Distancia mínima a la estación de TM en metros", y = "Cantidad",
-       title = "Distribución de la distancia a la estación de TM") +
+  geom_histogram(bins = 50, fill = "darkgreen") +
+  labs(x = "Distancia a la estación más cercana", y = "Cantidad",
+       subtitle = "Base de datos de prueba",
+       title = "Distancia a la estación de TransMilenio",
+              ) +
   theme_bw()
-ggplotly(testTMgraf)
+testTMgraf
+
+ggsave("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/view/DistanciaTM_Test.png")
+
+##Exportación de BD con variable de distancia de TM
+
+save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM.Rda")
+save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Test-TM.Rda")
 
 ################# Estratificación #############################################
 
 
 URL_estrato<-"https://datosabiertos.bogota.gov.co/dataset/55467552-0af4-4524-a390-a2956035744e/resource/29f2d770-bd5d-4450-9e95-8737167ba12f/download/manzanaestratificacion.json"
 estratos <- read_sf(URL_estrato)
+
+
+
 
 #estratos_adj<- estratos %>% mutate(ESTRATO = replace(ESTRATO,ESTRATO==0,2))
 
