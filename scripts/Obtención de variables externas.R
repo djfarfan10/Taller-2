@@ -84,11 +84,6 @@ testTMgraf
 
 ggsave("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/view/DistanciaTM_Test.png")
 
-##Exportación de BD con variable de distancia de TM
-
-save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM.Rda")
-save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Test-TM.Rda")
-
 ################# Estratificación #############################################
 
 ##Cargue de información de estratos
@@ -188,3 +183,8 @@ leaflet() %>%
              fillOpacity = 1,
              opacity = 1
              )
+
+##Exportación de bases de datos con variables externas
+
+save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM-Estratos.Rda")
+save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Test-TM-Estratos.Rda")
