@@ -95,55 +95,96 @@ save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría e
 URL_estrato<-"https://datosabiertos.bogota.gov.co/dataset/55467552-0af4-4524-a390-a2956035744e/resource/29f2d770-bd5d-4450-9e95-8737167ba12f/download/manzanaestratificacion.json"
 estratos <- read_sf(URL_estrato)
 
+estratos<-estratos%>%filter(ESTRATO!=0)
+
+#Se transforma la proyección para homogeneizarla con las bases
+
 save(estratos,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/estratos.Rda")
 
-#Geometría y ubicación de polígonos de estrato
-#estratos_geometria <- estratos$osm_polygons %>% 
-#  select(osm_id, name)
+estratos <-st_transform(estratos,4686)
+train_sf_4686<-st_transform(train_sf,4686)
+test_sf_4686<-st_transform(test_sf,4686)
+
+#Unión de la base de train con estratos a partir del st_join
+##sf_use_s2(FALSE)
+##db<- st_join(train_sf_4686,estratos,join=st_intersects)
+
+##db<-as.tibble(db)
+##db %>% count(ESTRATO)
+
+##Los NA son casi la mitad de los datos; esto se debe a que hay muchas viviendas
+##que no están dentro de los polígonos, por ejemplo, parques o vías.
+
+##Se procede a realizar la asignación por el polígono más cercano, según su
+##centroide
 
 #Centroides de los polígonos de estrato
 
 cent_estratos <- gCentroid(as(estratos$geometry, "Spatial"), byid = T)
 
+cent_est_sf <- st_as_sf(cent_estratos, coords = c("x", "y"))
+
+cent_est_sf <-st_transform(cent_est_sf,4686)
 
 
-#latitud_central <- mean(train$lat)
-#longitud_central <- mean(train$lon)
+estratos_nearest_train<-st_nearest_feature(train_sf_4686,cent_est_sf)
+estratos_nearest_test<-st_nearest_feature(test_sf_4686,cent_est_sf)
 
-#leaflet() %>%
-#  addTiles() %>%
-#  setView(lng = longitud_central, lat = latitud_central, zoom = 12) %>%
-#  addPolygons(data = estratos, col = "red",weight = 10,
-#              opacity = 0.8, popup = estratos$ESTRATO) %>%
-#  addCircles(lng = cent_estratos$x, 
-#             lat = cent_estratos$y, 
-#             col = "darkblue", opacity = 0.5, radius = 1)
+train<-train %>% 
+  mutate(estrato = estratos$ESTRATO[estratos_nearest_train])
 
-#estratos_adj<- estratos %>% mutate(ESTRATO = replace(ESTRATO,ESTRATO==0,2))
+test<-test %>% 
+  mutate(estrato = estratos$ESTRATO[estratos_nearest_test])
 
-tb_estrato<-as.tibble(estratos)
-tb_estrato_adj<-as.tibble(estratos_adj)
+#Verificación gráfica
 
-tb_estrato %>% count(ESTRATO)
-tb_estrato_adj %>% count(ESTRATO)
+latitud_central <- mean(train$lat)
+longitud_central <- mean(train$lon)
 
-estrato_0<- estratos%>%filter(ESTRATO==0)
-estrato_1<- estratos%>%filter(ESTRATO==1)
-estrato_2<- estratos%>%filter(ESTRATO==2)
-estrato_3<- estratos%>%filter(ESTRATO==3)
-estrato_4<- estratos%>%filter(ESTRATO==4)
-estrato_5<- estratos%>%filter(ESTRATO==5)
-estrato_6<- estratos%>%filter(ESTRATO==6)
+estratos <- estratos %>%
+  mutate(color = case_when(ESTRATO == "1" ~ "red",
+                           ESTRATO == "2" ~ "blue",
+                           ESTRATO == "3" ~ "yellow",
+                           ESTRATO == "4" ~ "orange",
+                           ESTRATO == "5" ~ "green",
+                           ESTRATO == "6" ~ "purple"))
 
-ggplot()+
-  geom_sf(data=estrato_0, col="red")+
-  geom_sf(data=estrato_1, col="blue")+
-  geom_sf(data=estrato_2, col="black")+
-  geom_sf(data=estrato_3, col="grey")+
-  geom_sf(data=estrato_4, col="green")+
-  geom_sf(data=estrato_5, col="purple")+
-  geom_sf(data=estrato_6, col="orange")
+train <- train %>%
+  mutate(color = case_when(estrato == "1" ~ "red",
+                           estrato == "2" ~ "blue",
+                           estrato == "3" ~ "yellow",
+                           estrato == "4" ~ "orange",
+                           estrato == "5" ~ "green",
+                           estrato == "6" ~ "purple"))
 
+test <- test %>%
+  mutate(color = case_when(estrato == "1" ~ "red",
+                           estrato == "2" ~ "blue",
+                           estrato == "3" ~ "yellow",
+                           estrato == "4" ~ "orange",
+                           estrato == "5" ~ "green",
+                           estrato == "6" ~ "purple")) 
 
+##Gráfica de los polígonos con estrato
 
-              
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = longitud_central, lat = latitud_central, zoom = 11) %>%
+  addPolygons(data = estratos, col = estratos$color,weight = 1,
+              opacity = 0.8) %>%
+  addCircles(lng = train$lon, 
+             lat = train$lat, 
+             col = train$color,
+             fillOpacity = 1,
+             opacity = 1,
+             weight = 0.5)
+  
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = longitud_central, lat = latitud_central, zoom = 11) %>%
+  addCircles(lng = train$lon, 
+             lat = train$lat, 
+             col = train$color,
+             fillOpacity = 1,
+             opacity = 1
+             )
