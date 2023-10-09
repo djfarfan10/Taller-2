@@ -88,7 +88,7 @@ df_train_1 %>%
 
 #Creación de variable de área desde la descripción
 
-area_total <- str_extract(df_train_1$description, "[0-9]{2,}m[a-z0-9]+ m[a-z0-9]+")
+area_total <- str_extract(df_train_1$description, "[0-9]{2,} m[a-z0-9]+")
 head(area_total)
 
 df_train_1 <- df_train_1 %>% 
@@ -104,6 +104,14 @@ skim(df_train_1)
 df_train_1 <- df_train_1 %>% 
   mutate(area_def=pmax(df_train_1$surface_covered,df_train_1$surface_total,df_train_1$area_tamano,na.rm = TRUE)) 
 
+x<- 20000
+subset_df <- subset(df_train_1, df_train_1$area_def>x & df_train_1$area_def !="none")
+print(subset_df)
+
+subset_df %>%
+  count(property_type_2)
+
+
 sapply(df_train_1, function(x) sum(is.na(x)))
 
 hist(df_train_1$area_def, main="Histograma del área", xlab="Área",ylab="Densidad/Frecuencia",col="darkblue", border = ("grey"), breaks=100)
@@ -116,6 +124,5 @@ summary(df_continuas)
 
 ## Creación variable de baños
 
-df_train_1 <- df_train_1 %>%
-  mutate(num_banos= str_extract(description, "(\\w+|\\d+) (\\w+|\\d+) bano|banos|bao|baos  (\\w+|\\d+) (\\w+|\\d+)"))
+
 
