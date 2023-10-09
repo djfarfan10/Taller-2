@@ -49,13 +49,15 @@ sapply(df_train_1, function(x) sum(is.na(x)))
 ### Verificación del property_type
 
 df_train_1 <- df_train_1 %>%
-  mutate(property_type_2 = ifelse(grepl("casa", description), "casa", property_type))
+  mutate(property_type_2 = ifelse(grepl("[Cc]asa", description), "Casa", property_type))
 
 # Se repite el caso anterior pero ahora buscamos apartamento o apto.
 df_train_1 <- df_train_1 %>%
-  mutate(property_type_2 = ifelse(grepl("apto|apartamento", description), "apartamento", property_type_2)) %>%
+  mutate(property_type_2 = ifelse(grepl("[Aa]pto|[Aa]partamento", description), "Apartamento", property_type_2)) %>%
   select(-property_type)
 
+df_train_1 %>%
+  count(property_type_2)
 
 ### Normalización de texto de la variable description
 
@@ -79,14 +81,14 @@ df_train_1 <- df_train_1 %>%
 #Creación de variable dicotoma para parqueaderos, garajes o estacionamiento
 
 df_train_1 <- df_train_1 %>%
-  mutate(parqueadero = as.numeric(grepl("parqueadero?|garaje|estacionamiento?", df_train_1$description)))
+  mutate(parqueadero = as.numeric(grepl("[Pp]arqueadero?|[Gg]araje?|[Ee]stacionamiento?", df_train_1$description)))
 
 df_train_1 %>%
   count(parqueadero)
 
 #Creación de variable de área desde la descripción
 
-area_total <- str_extract(df_train_1$description, "[0-9]{2,} m[a-z0-9]+")
+area_total <- str_extract(df_train_1$description, "[0-9]{2,}m[a-z0-9]+ m[a-z0-9]+")
 head(area_total)
 
 df_train_1 <- df_train_1 %>% 
@@ -104,6 +106,13 @@ df_train_1 <- df_train_1 %>%
 
 sapply(df_train_1, function(x) sum(is.na(x)))
 
+hist(df_train_1$area_def, main="Histograma del área", xlab="Área",ylab="Densidad/Frecuencia",col="darkblue", border = ("grey"), breaks=100)
+hist(df_train_1$price, main="Histograma del precio", xlab="Precio",ylab="Densidad/Frecuencia",col="darkblue", border = ("grey"), breaks=100)
+
+df_continuas<- df_train_1 %>% 
+  select(area_def, price)
+
+summary(df_continuas)
 
 ## Creación variable de baños
 
