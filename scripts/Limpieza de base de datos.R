@@ -227,4 +227,31 @@ glimpse(df_train_1)
 summary(df_train_1$bano_social)
 
 
+#Creación de variable dicotoma para depositos
+
+df_train_1 <- df_train_1 %>% 
+  mutate(bodega1=str_detect(df_train_1$description,"[bv]o?de?[gj]a?")) %>% 
+  mutate(deposito1=str_detect(df_train_1$description,"de?po?[cs]ito?s?")) %>%
+  mutate(deposito_def=ifelse((bodega1==TRUE | deposito1==TRUE),1,0))
+
+df_train_1 %>%
+  count(deposito_def)
+
+#Creación de variable si es nuevo o no
+
+df_train_1 <- df_train_1 %>% 
+  mutate(nuevo=str_detect(df_train_1$description,"[nm]ue[vb][oa]")) %>% 
+  mutate(estado_construccion=ifelse((nuevo==TRUE),1,0))
+
+df_train_1 %>%
+  count(estado_construccion)
+
+df_train_1 <- df_train_1 %>% 
+  mutate(remodelado=str_detect(df_train_1$description,"[a-z]emodela[db][a-z]")) %>% 
+  mutate(estado_construccion=ifelse((remodelado==TRUE),1,0))
+
+df_train_1 %>%
+  count(estado_construccion)
+
+
 
