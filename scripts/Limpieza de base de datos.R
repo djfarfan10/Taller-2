@@ -88,7 +88,7 @@ df_train_1 %>%
 
 #Creación de variable de área desde la descripción
 
-area_total <- str_extract(df_train_1$description, "[0-9]{2,} m[a-z0-9]+")
+area_total <- str_extract(df_train_1$description, "[0-9]{2,} m[a-z0-9]+|[0-9]{2,}m[a-z0-9]+")
 head(area_total)
 
 df_train_1 <- df_train_1 %>% 
@@ -121,6 +121,32 @@ df_continuas<- df_train_1 %>%
   select(area_def, price)
 
 summary(df_continuas)
+
+########## Eliminación de outliers ############
+
+## Se eliminaran todas aquellas observaciones del área que esten a más de 3 desviaciones estándar de la media
+
+## Media de los datos observados para área
+
+NAN2_df_area <- df_train_1[!is.na(df_train_1$area_def), ]
+sapply(NAN2_df_area, function(x) sum(is.na(x)))
+
+mean_area<- mean(NAN2_df_area$area_def)
+
+print(mean_area)
+
+##Desviación estándar de los datos observados de área
+
+std_area<- sd(NAN2_df_area$area_def)
+print(std_area)
+
+## Cálculo de limite superior para eliminación de outliers
+
+mean_plus_3std<-mean_area+3*std_area
+print(mean_plus_3std)
+##
+
+
 
 ## Creación variable de baños
 
