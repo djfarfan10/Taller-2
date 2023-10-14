@@ -1,0 +1,62 @@
+##### Obtención de variables externas #####
+
+
+# Instalar y cargar pacman (contiene la función p_load)
+install.packages("pacman")
+require(pacman) 
+
+# Cargar las librerías
+p_load(tidyverse, # Manipular dataframes
+       rio, # Import data easily
+       plotly, # Gráficos interactivos
+       leaflet, # Mapas interactivos
+       rgeos, # Calcular centroides de un poligono
+       tmaptools, # geocode_OSM()
+       sf, # Leer/escribir/manipular datos espaciales
+       osmdata, # Get OSM's data 
+       tidymodels) #para modelos de ML
+
+# Importar los datos
+train<-read.csv("C:/Users/a.ariza10/Desktop/Taller 2/test.csv")
+test<-read.csv("C:/Users/a.ariza10/Desktop/Taller 2/train.csv")
+
+# Cambiar a objeto simple features
+train_sf <- st_as_sf(train, 
+                     coords = c("lon", "lat"), 
+                     crs=4326)
+test_sf <- st_as_sf(test, 
+                    coords = c("lon", "lat"), 
+                    crs=4326)
+
+
+### Cercanía a parques ### 
+
+
+# Visulaizar los tags de leisure
+print(
+  available_tags("leisure"),
+  n=34)
+
+
+# Extraer la info de todos los parques de Chapinero
+bbox_bogota <- c(left = -74.227, bottom = 4.464, right = -73.997, top = 4.837)
+
+parks <- opq(bbox = bbox_bogota) %>%
+  add_osm_feature(key = "leisure" , value = "park")
+
+# Cambiar el formato para que sea un objeto sf (simple features)
+parks_sf <- osmdata_sf(parks)
+
+# Sacar la geomtería de los parques: tamaños y limites 
+geometry_of_parks <- parks_sf$osm_polygons %>% 
+  select(osm_id, name)
+
+# Mapa de los parques en Bogotá
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = geometry_of_parks, col = "green",weight = 10,
+              opacity = 0.8, popup = geometry_of_parks$name)
+
+# Calcular el centroide de cada parque
+centroids_parks <- gCentroid(as(geometry_of_parks$geometry, "Spatial"), byid = T)
+
