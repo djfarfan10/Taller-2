@@ -124,6 +124,7 @@ summary(df_continuas)
 
 ########## Eliminación de outliers ############
 
+
 ## Se eliminaran todas aquellas observaciones del área que esten a más de 3 desviaciones estándar de la media
 
 ## Media de los datos observados para área
@@ -135,6 +136,17 @@ mean_area<- mean(NAN2_df_area$area_def)
 
 print(mean_area)
 
+##Imputación de variable área por la mediana
+
+median_area<- median(NAN2_df_area$area_def)
+print(median_area)
+
+df_train_1 <- df_train_1 %>%
+  mutate(area_def = replace_na(area_def, 119),)
+
+summary(df_train_1)
+sapply(df_train_1, function(x) sum(is.na(x)))
+
 ##Desviación estándar de los datos observados de área
 
 std_area<- sd(NAN2_df_area$area_def)
@@ -144,11 +156,75 @@ print(std_area)
 
 mean_plus_3std<-mean_area+3*std_area
 print(mean_plus_3std)
-##
 
+##Eliminación de outliers por área
 
+df_train_1<- df_train_1[df_train_1$area_def <= 1000, ]
+df_train_1<- df_train_1[df_train_1$area_def >= 30, ]
+
+summary(df_train_1)
+
+hist(df_train_1$area_def, main="Histograma del área", xlab="Área",ylab="Densidad/Frecuencia",col="darkblue", border = ("grey"), breaks=100)
 
 ## Creación variable de baños
+
+banos_1 <- str_extract(df_train_1$description, "\\s? [0-9]+ ba[^lsrh][^cd]")
+print(banos_1)
+skim(banos_1)
+
+banos_conteo <- str_count(df_train_1$description, "ba[^lsrh][^cd]")
+
+skim(banos_conteo)
+
+df_train_1 <- df_train_1 %>% 
+  mutate(bano_2=str_extract(banos_1,"[0-9]+")) %>% 
+  mutate(bano_3=str_count(df_train_1$description, "ba[^lsrh][^cd]"))
+
+
+df_train_1$bano_2 <- as.numeric(db_ps$bano_d1)
+df_train_1$bano_3 <- as.numeric(db_ps$bano_d2)
+skim(db_ps)
+
+table(df_train_1$bano_2)
+
+df_train_1 <- df_train_1 %>% # Se escoge el valor máximo de las variables
+  mutate(bano_def=pmax(df_train_1$bano_2,df_train_1$bano_3,df_train_1$bathrooms,na.rm = TRUE))
+
+df_train_1 <- df_train_1 %>%
+  mutate(bano_def=ifelse(bano_def>10,pmax(df_train_1$bano_3,df_train_1$bathrooms,na.rm = TRUE),df_train_1$bano_def)) 
+
+skim(df_train_1)
+
+glimpse(df_train_1)
+
+df_train_1$bano_defnum <- as.numeric(df_train_1$bano_def)
+
+hist(df_train_1$bano_defnum, main="Histograma de banos", xlab="Banos",ylab="Densidad/Frecuencia",col="darkblue", border = ("grey"), breaks=2)
+
+# Crear una tabla de frecuencias usando la función table para baños
+tabla_frecuencias_banos <- table(df_train_1$bano_defnum)
+
+# Mostrar la tabla de frecuencias
+print(tabla_frecuencias_banos)
+
+summary(df_train_1$bano_defnum)
+
+tabla <- table(df_train_1$bano_def)
+print(tabla)
+
+skim(df_train_1)
+
+## Determinación de nueva variable "Tiene baño social"
+## Si el #de baños es mayor al número de habitaciones, hay baño social
+
+df_train_1 <- df_train_1 %>%
+  mutate(bano_social = if_else(bano_defnum > bedrooms, "si", "no"))
+
+skim(df_train_1)
+
+glimpse(df_train_1)
+
+summary(df_train_1$bano_social)
 
 
 
