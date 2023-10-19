@@ -194,6 +194,7 @@ save(UPL,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en
 
 #Seleccionar las columnas que se requieren
 UPL <- UPL %>% select(CODIGO_UPL,NOMBRE)
+colnames(UPL)[2]<-"UPL"
 
 #Transformación del sistema de proyección de UPL
 
