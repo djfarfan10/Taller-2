@@ -184,6 +184,26 @@ leaflet() %>%
              opacity = 1
              )
 
+################# Asignación de UPL #############################################
+
+#Acceso al archivo de UPL
+
+URL_UPL<-"https://datosabiertos.bogota.gov.co/dataset/808582fc-ffc8-4649-8428-7e1fd8d3820c/resource/a5c8c591-0708-420f-8eb7-9f3147e21c40/download/unidadplaneamientolocal.json"
+UPL <- read_sf(URL_UPL)
+save(UPL,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/UPL.Rda")
+
+#Transformación del sistema de proyección de UPL
+UPL <- UPL %>% filter()
+
+UPL<-st_transform(UPL, crs=st_crs(train_sf))
+
+train <- st_as_sf(train, coords = c("lon", "lat"), crs=4326)
+test <- st_as_sf(test, coords = c("lon", "lat"), crs=4326)
+
+train_a<-st_join(train, UPL, join=st_intersects)
+
+
+
 ##Exportación de bases de datos con variables externas
 
 save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM-Estratos.Rda")
