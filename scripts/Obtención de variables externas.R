@@ -192,19 +192,23 @@ URL_UPL<-"https://datosabiertos.bogota.gov.co/dataset/808582fc-ffc8-4649-8428-7e
 UPL <- read_sf(URL_UPL)
 save(UPL,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/UPL.Rda")
 
-#Transformación del sistema de proyección de UPL
-UPL <- UPL %>% filter()
+#Seleccionar las columnas que se requieren
+UPL <- UPL %>% select(CODIGO_UPL,NOMBRE)
 
-UPL<-st_transform(UPL, crs=st_crs(train_sf))
+#Transformación del sistema de proyección de UPL
 
 train <- st_as_sf(train, coords = c("lon", "lat"), crs=4326)
 test <- st_as_sf(test, coords = c("lon", "lat"), crs=4326)
 
-train_a<-st_join(train, UPL, join=st_intersects)
+UPL<-st_transform(UPL, crs=st_crs(train))
 
+#Unión de las bases de datos
+
+train<-st_join(train, UPL, join=st_intersects)
+test<-st_join(test, UPL, join=st_intersects)
 
 
 ##Exportación de bases de datos con variables externas
 
-save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM-Estratos.Rda")
-save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Test-TM-Estratos.Rda")
+save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM-Est-UPL.Rda")
+save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Test-TM-Est-UPL.Rda")
