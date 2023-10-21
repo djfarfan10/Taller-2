@@ -505,15 +505,10 @@ df_test_1 %>%
 setwd("C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores")
 
 
-#Bases de upz
+#Importando las bases de datos 
 
-load("Train2.Rda")
-
-view(Train2)
-
-train_TM_Est_UPL <- Train2
-
-
+save(df_train_1,file = "C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores/train_clean.Rda")
+save(df_test_1,file = "C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores/test_clean.Rda")
 
 
 
