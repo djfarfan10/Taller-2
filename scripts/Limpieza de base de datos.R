@@ -505,21 +505,13 @@ df_test_1 %>%
 setwd("C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores")
 
 
-#Estaciones de transmilenio
-
-load("estaciones_TM.Rda")
-estaciones_TM<- estaciones_TM
-
-#Estratos 
-
-load("estratos.Rda")
-estratos<- estratos
-
 #Bases de upz
 
-load("Train.Rda")
+load("Train2.Rda")
 
-train_TM_Est_UPL <- Train_TM_Est_UPL
+view(Train2)
+
+train_TM_Est_UPL <- Train2
 
 
 
