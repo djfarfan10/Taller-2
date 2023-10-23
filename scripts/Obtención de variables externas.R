@@ -208,8 +208,24 @@ UPL<-st_transform(UPL, crs=st_crs(train))
 train<-st_join(train, UPL, join=st_intersects)
 test<-st_join(test, UPL, join=st_intersects)
 
+################# Asignación de UPZ #############################################
+UPZ <- st_read("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/poblacion-upz-bogota.geojson")
+
+UPZ <- UPZ %>% select(-area_urbana_en_hectareas_ha,-poblacion_urbana)
+
+#Renombrar las columnas de interés
+colnames(UPZ)[2]<-"Localidad"
+colnames(UPZ)[4]<-"UPZ"
+
+UPZ<-st_transform(UPZ, crs=st_crs(train))
+
+#Unión de las bases de datos
+
+train<-st_join(train, UPZ, join=st_intersects)
+test<-st_join(test, UPZ, join=st_intersects)
+
 
 ##Exportación de bases de datos con variables externas
 
-save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM-Est-UPL.Rda")
-save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Test-TM-Est-UPL.Rda")
+save(train,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Train-TM-Est-UPL-UPZ.Rda")
+save(test,file = "C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Test-TM-Est-UPL-UPZ.Rda")
