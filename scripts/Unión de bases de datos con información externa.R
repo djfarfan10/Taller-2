@@ -1,6 +1,6 @@
 ## Merge de la base con variables externas
 
-setwd("C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores")
+setwd("d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores")
 
 library (pacman)
 p_load(tidyverse, # Manipular dataframes
@@ -23,22 +23,27 @@ p_load(tidyverse, # Manipular dataframes
 
 ## Cargue de base de datos
 
-load("Train2.Rda")
-load("Test-TM-Est-UPL.Rda")
+load("Test-TM-Est-UPL-UPZ.Rda")
+load("Train-TM-Est-UPL-UPZ.Rda")
 
 ##Selección de variables externas para train
 
 df_train <- train
 
 df_train<- df_train %>%
-  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL, geometry)
+  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL,cod_loc,Localidad,cod_upz,UPZ,densidad_urbana,geo_point_2d, geometry)
 
 ## Selección de variables externas para test
 
 df_test <- test
 
 df_test<- df_test %>%
-  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL, geometry)
+  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL,cod_loc,Localidad,cod_upz,UPZ,densidad_urbana,geo_point_2d, geometry)
+
+sapply(df_test, function(x) sum(is.na(x))) ##49 NAN por UPZ
+
+sapply(df_train, function(x) sum(is.na(x))) ##6 NAN por UPZ
+
 
 ##Cargue de df con bases limpias
 
@@ -70,7 +75,6 @@ sapply(df_test_merged, function(x) sum(is.na(x)))
 sapply(df_test_1, function(x) sum(is.na(x)))
 
 
-
 ##### Merge de variables de texto y externas para train
 
 df_train_merged <- merge(df_train_1, df_train, by = "property_id", all.x = TRUE)
@@ -81,58 +85,22 @@ sapply(df_train_merged, function(x) sum(is.na(x)))
 sapply(df_test_1, function(x) sum(is.na(x)))
 
 
+##Eliminación de NANs de UPZ de TEST y train
+
+##Train
+
+df_train_merged<- df_train_merged[!is.na(df_train_merged$UPZ), ]
+sapply(df_train_merged, function(x) sum(is.na(x)))
+
+##Test
+
+df_test_merged<- df_test_merged[!is.na(df_test_merged$UPZ), ]
+sapply(df_test_merged, function(x) sum(is.na(x)))
+
+
 ## Guardando las bases de datos finales 
 
-save(df_train_1,file = "C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores/train_def.Rda")
-save(df_test_1,file = "C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores/test_def.Rda")
-
-
-## UPZ
-
-require("rgeos")
-require("osmdata")
-require("osmdata_sf")
-require("leaflet")
-require("pacman")
-require("tidyverse")
-require("sf")
-require("devtools")
-require(skimr)
-require(stringr)
-require(ggplot2)
-p_load(skimr,pacman,tidyverse,sf,devtools,leaflet,rio,osmdata,rgeos,vtable,stargazer,spatialsample)
-
-getwd()
-upz <- sf::st_read("../stores/upz-bogota.shp") %>% 
-  st_transform(4326)
-
-upz_df <- st_join(df_sf,upz,join=st_within)
-
-glimpse(upz_df)
-ls(upz_df)
-skim(upz_df)
-#write_csv2(upz_df,"../stores/upz.csv")
-faltantes <- read.csv2("../stores/upz_FALTANTES.csv",header = T)
-ls(upz_df)
-ls(faltantes)
-upz_df1 <- full_join(upz_df,faltantes,"property_id")
-head(upz_df1)
-ls(upz_df1)
-upz_df1 <- upz_df1 %>% 
-  mutate(nom_upz.x=ifelse(is.na(nom_upz.x),nom_upz.y,nom_upz.x)) %>% 
-  select(-c(sample.y,nom_upz.y)) %>% 
-  rename(sample=sample.x) %>% 
-  rename(nom_upz=nom_upz.x) %>% 
-  filter(!is.na(sample))
-upz_df <- upz_df1
-skim(upz_df)
-
-# Se eliminan observaciones sin UPZ en el train
-upz_df <- upz_df %>% 
-  group_by(sample) %>% 
-  filter(!is.na(nom_upz)) %>% 
-  select(-c(cod_loc,area_urbana,poblacion_u,densidad_ur,cod_upz,nomb_loc))
-
-
+save(df_train_merged,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/train_def1.Rda")
+save(df_test_merged,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/test_def1.Rda")
 
 
