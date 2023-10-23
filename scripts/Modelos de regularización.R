@@ -24,7 +24,7 @@
   test <- test %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
                                                     bano_social == "no"~ 0))
                       
-  #Cambio a variable double
+  #Cambio a variable doublede la distancia de TransMilenio
   
   train$distancia_TM<-as.double(train$distancia_TM)
   test$distancia_TM<-as.double(test$distancia_TM)
@@ -86,3 +86,8 @@
   modelo_01 <- finalize_workflow(workf1, best_penalty)
 
   modelo_01_fit <- fit(modelo_01, data = train)
+  
+  
+  predict(modelo_01_fit, train)
+  augment(modelo_01_fit, new_data = train) %>%
+    rmse(truth = price, estimate = .pred)
