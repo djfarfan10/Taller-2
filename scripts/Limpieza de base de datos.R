@@ -559,6 +559,28 @@ df_train_1 <- df_train_1 %>% mutate(estado_remodelado = case_when(estado_remodel
 df_test_1 <- df_test_1 %>% mutate(estado_remodelado = case_when(estado_remodelado == "si"~ 1,
                                                                 estado_remodelado == "no"~ 0))
 
+##Balcón o terraza
+
+df_train_1 <- df_train_1 %>% mutate(terraza_balcon_def = case_when(terraza_balcon_def == "si"~ 1,
+                                                                   terraza_balcon_def == "no"~ 0))
+
+df_test_1 <- df_test_1 %>% mutate(estado_remodelado = case_when(terraza_balcon_def == "si"~ 1,
+                                                                terraza_balcon_def == "no"~ 0))
+
+
+#Definición de variables categóricas
+variables_categoricas <- c("parqueadero",
+                           "bano_social",
+                           "deposito_def",
+                           "estado_construccion",
+                           "estado_remodelado", 
+                           "terraza_balcon_def",
+                           "estrato",
+                           "cod_loc",
+                           "cod_upz")
+
+df_train_1 <- df_train_1 %>% mutate_at(variables_categoricas, as.factor)
+df_test_1 <- df_test_1 %>% mutate_at(variables_categoricas, as.factor)
 
 #Importando las bases de datos 
 
