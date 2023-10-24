@@ -514,10 +514,56 @@ df_test_1 <- df_test_1 %>%
 
 sapply(df_test_1, function(x) sum(is.na(x)))
 
+
+##Ajustando variables
+
+## Baño social
+
+df_train_1 <- df_train_1 %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
+                                                  bano_social == "no"~ 0))
+
+df_test_1 <- df_test_1 %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
+                                                            bano_social == "no"~ 0))
+
+## Parqueadero
+
+df_train_1 <- df_train_1 %>% mutate(parqueadero = case_when(parqueadero == "si"~ 1,
+                                                            parqueadero == "no"~ 0))
+
+df_test_1 <- df_test_1 %>% mutate(parqueadero = case_when(parqueadero == "si"~ 1,
+                                                          parqueadero == "no"~ 0))
+
+## Deposito final
+
+df_train_1 <- df_train_1 %>% mutate(deposito_def = case_when(deposito_def == "si"~ 1,
+                                                            deposito_def == "no"~ 0))
+
+df_test_1 <- df_test_1 %>% mutate(deposito_def = case_when(deposito_def == "si"~ 1,
+                                                           deposito_def == "no"~ 0))
+
+
+##Estado construcción
+
+df_train_1 <- df_train_1 %>% mutate(estado_construccion = case_when(estado_construccion == "si"~ 1,
+                                                                    estado_construccion == "no"~ 0))
+
+df_test_1 <- df_test_1 %>% mutate(estado_construccion = case_when(estado_construccion == "si"~ 1,
+                                                           estado_construccion == "no"~ 0))
+
+
+##Estado remodelado
+
+df_train_1 <- df_train_1 %>% mutate(estado_remodelado = case_when(estado_remodelado == "si"~ 1,
+                                                                  estado_remodelado == "no"~ 0))
+
+df_test_1 <- df_test_1 %>% mutate(estado_remodelado = case_when(estado_remodelado == "si"~ 1,
+                                                                estado_remodelado == "no"~ 0))
+
+
 #Importando las bases de datos 
 
-save(df_train_1,file = "C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores/train_clean.Rda")
-save(df_test_1,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/test_clean.Rda")
+save(df_train_1,file = "C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/train_clean.Rda")
+save(df_test_1,file = "C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/test_clean.Rda")
 
 
 
