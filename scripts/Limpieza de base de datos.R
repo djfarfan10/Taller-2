@@ -429,7 +429,7 @@ print(mediana_bano)
 
 
 df_test_1 <- df_test_1 %>%
-  mutate(bano_defnum = replace_na(area_def, 3),)
+  mutate(bano_defnum = replace_na(bano_defnum, 3),)
 
 summary(df_test_1)
 sapply(df_test_1, function(x) sum(is.na(x)))
@@ -464,13 +464,13 @@ NAN2_df_dep <- df_test_1[!is.na(df_test_1$deposito_def), ]
 
 sapply(NAN2_df_dep, function(x) sum(is.na(x)))
 
-mediana_dep<- median(NAN2_df_banos$deposito_def)
+mediana_dep<- median(NAN2_df_dep$deposito_def)
 
 print(mediana_dep)
 
 
 df_test_1 <- df_test_1 %>%
-  mutate(deposito_def = replace_na(area_def, 0),)
+  mutate(deposito_def = replace_na(deposito_def, 0),)
 
 sapply(df_test_1, function(x) sum(is.na(x)))
 
@@ -485,7 +485,7 @@ df_test_1 %>%
   count(estado_construccion)
 
 df_test_1 <- df_test_1 %>%
-  mutate(estado_construccion = replace_na(area_def, 0),)
+  mutate(estado_construccion = replace_na(estado_construccion, 0),)
 
 df_test_1 <- df_test_1 %>% 
   mutate(remodelado=str_detect(df_test_1$description,"[a-z]emodela[db][a-z]")) %>% 
@@ -495,7 +495,7 @@ df_test_1 %>%
   count(estado_remodelado)
 
 df_test_1 <- df_test_1 %>%
-  mutate(estado_remodelado = replace_na(area_def, 0),)
+  mutate(estado_remodelado = replace_na(estado_remodelado, 0),)
 
 ## Creación de variable Balcón o Terraza
 
@@ -510,7 +510,7 @@ df_test_1 %>%
 sapply(df_test_1, function(x) sum(is.na(x)))
 
 df_test_1 <- df_test_1 %>%
-  mutate(terraza_balcon_def = replace_na(area_def, 0),)
+  mutate(terraza_balcon_def = replace_na(terraza_balcon_def, 0),)
 
 sapply(df_test_1, function(x) sum(is.na(x)))
 
