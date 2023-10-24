@@ -188,17 +188,84 @@ df_test_merged <- df_test_merged %>%
 
 ## Creación de variable de seguridad: Delitos totales por UPZ
 
-install.packages("readxl")
+library(readxl)
 
 
-df_seguridad<- read.csv("seguridad.csv")
+df_seguridad<- read.csv("seguridad2019.csv")
+
+df_seguridad <- df_seguridad %>% 
+  mutate(Código.upz=str_extract(Código.upz,"[0-9]{2,}"))
+
+class(df_seguridad$Código.upz)
+
+glimpse(df_seguridad)
+
+df_seguridad$Total.Hurto.Personas.2019<-as.integer(df_seguridad$Total.Hurto.Personas.2019)
+
+glimpse(df_seguridad)
+
+df_seguridad$Total.Hurto.Celulares.2019<-as.integer(df_seguridad$Total.Hurto.Celulares.2019)
+
+glimpse(df_seguridad)
+
+df_seguridad$Total.Violencia.intrafamiliar.2019<-as.integer(df_seguridad$Total.Violencia.intrafamiliar.2019)
+
+glimpse(df_seguridad)
+
+##creación variable delitos totales por UPZ 2019
+
+df_seguridad <- df_seguridad %>% 
+  mutate(delitos_total_2019 = Total.Homicidios.2019 + Total.Lesiones.Personales.2019 +Total.Hurto.Residencias.2019 + Total.Hurto.Automotores.2019 + Total.Hurto.Bicicletas.2019 + Total.Hurto.Comercio.2019 + Total.Hurto.Celulares.2019 + Total.Hurto.Motocicletas.2019 + Total.Delitos.Sexuales.2019 + Total.Violencia.intrafamiliar.2019)
+
+sapply(df_seguridad, function(x) sum(is.na(x)))
+
+df_seguridad<- df_seguridad[!is.na(df_seguridad$Código.upz), ]
+
+sapply(df_seguridad, function(x) sum(is.na(x)))
+
+df_seguridad <- df_seguridad %>%
+  mutate(Total.Hurto.Celulares.2019 = replace_na(Total.Hurto.Celulares.2019, 0),)
+
+df_seguridad <- df_seguridad %>%
+  mutate(Total.Violencia.intrafamiliar.2019 = replace_na(Total.Violencia.intrafamiliar.2019, 0),)
 
 
+df_seguridad <- df_seguridad %>% 
+  mutate(delitos_total_2019 = Total.Homicidios.2019 + Total.Lesiones.Personales.2019 +Total.Hurto.Residencias.2019 + Total.Hurto.Automotores.2019 + Total.Hurto.Bicicletas.2019 + Total.Hurto.Comercio.2019 + Total.Hurto.Celulares.2019 + Total.Hurto.Motocicletas.2019 + Total.Delitos.Sexuales.2019 + Total.Violencia.intrafamiliar.2019)
+
+sapply(df_seguridad, function(x) sum(is.na(x)))
+
+df_seguridad_1<- df_seguridad %>%
+  select(Código.upz, delitos_total_2019)
+
+######### Variable de seguridad
+
+df_seguridad_1$cod_upz <- df_seguridad_1$Código.upz
+df_seguridad_1 <- df_seguridad_1[, -which(names(df_seguridad_1) == "Código.upz")]
+
+df_train_merge2 <- merge(df_train_merged, df_seguridad_1, by = "cod_upz", all.x = TRUE)
+
+df_train_merge2 %>%
+  count(cod_upz)
+
+df_test_merge2 <- merge(df_test_merged, df_seguridad_1, by = "cod_upz", all.x = TRUE)
+df_test_merge2 %>%
+  count(cod_upz)
+
+
+sapply(df_test_merge2, function(x) sum(is.na(x)))
+sapply(df_train_merge2, function(x) sum(is.na(x)))
+
+df_train_merge2<- df_train_merge2[!is.na(df_train_merge2$delitos_total_2019), ]
+sapply(df_train_merge2, function(x) sum(is.na(x)))
+
+class(df_train_merge2$delitos_total_2019)
+class(df_test_merge2$delitos_total_2019)
 
 
 ## Guardando las bases de datos finales 
 
-save(df_train_merged,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/train_def1.Rda")
-save(df_test_merged,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/test_def1.Rda")
+save(df_train_merge2,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/train_def1.Rda")
+save(df_test_merge2,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/test_def1.Rda")
 
 
