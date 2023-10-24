@@ -1,6 +1,6 @@
 ## Merge de la base con variables externas
 
-setwd("d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores")
+setwd("C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores")
 
 library (pacman)
 p_load(tidyverse, # Manipular dataframes
@@ -55,14 +55,14 @@ sapply(df_train, function(x) sum(is.na(x))) ##6 NAN por UPZ
 load("test_clean.Rda")
 
 df_test_1<- df_test_1 %>%
-  select(property_id, price, lat, lon, description, property_type_2, parqueadero, area_def, bano_defnum, bano_social, deposito_def, estado_construccion, estado_remodelado, terraza_balcon_def)
+  select(property_id, price, lat, lon, description, property_type_2, bedrooms, parqueadero, area_def, bano_defnum, bano_social, deposito_def, estado_construccion, estado_remodelado, terraza_balcon_def)
 
 ##Selección de variables de la base limpia para train
 
 load("train_clean.Rda")
 
 df_train_1<- df_train_1 %>%
-  select(property_id, price, lat, lon, description, property_type_2, parqueadero, area_def, bano_defnum, bano_social, deposito_def, estado_construccion, estado_remodelado, terraza_balcon_def)
+  select(property_id, price, lat, lon, description, property_type_2, bedrooms, parqueadero, area_def, bano_defnum, bano_social, deposito_def, estado_construccion, estado_remodelado, terraza_balcon_def)
 
 
 ##### Merge de variables de texto y externas para test
