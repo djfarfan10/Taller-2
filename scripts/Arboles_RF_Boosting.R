@@ -160,7 +160,7 @@ tune_rf <- tune_grid(
   metrics = metric_set(mae)
 )
 
-
+install.packages("xgboost")
 
 tune_boost <- tune_grid(
   workflow_1.3,
@@ -168,4 +168,5 @@ tune_boost <- tune_grid(
   grid = tune_grid_boost,
   metrics = metric_set(mae)
 )
+
 
