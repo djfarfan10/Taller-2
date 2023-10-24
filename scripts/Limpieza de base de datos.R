@@ -18,7 +18,7 @@ p_load(tidyverse, # Manipular dataframes
 
 ##Establecimiento del directorio de trabajo y cargue de base de datos
 
-setwd("C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores")
+setwd("d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores")
 df_train<- read.csv("train.csv")
 head(df_train)
 
@@ -279,7 +279,7 @@ sapply(df_test, function(x) sum(is.na(x)))
 
 #Dada la revisión , se eliminan 9 entradas que no tienen description
 
-df_test_1<- df_test[!is.na(df_test$description), ]
+df_test_1<- df_test
 sapply(df_test_1, function(x) sum(is.na(x)))
 
 
@@ -358,10 +358,7 @@ df_continuas<- df_test_1 %>%
 
 summary(df_continuas)
 
-########## Eliminación de outliers ############
 
-
-## Se eliminaran todas aquellas observaciones del área que esten a más de 3 desviaciones estándar de la media
 
 ## Media de los datos observados para área
 
@@ -384,22 +381,6 @@ df_test_1 <- df_test_1 %>%
 summary(df_test_1)
 sapply(df_test_1, function(x) sum(is.na(x)))
 
-##Desviación estándar de los datos observados de área
-
-std_area<- sd(NAN2_df_area$area_def)
-print(std_area)
-
-## Cálculo de limite superior para eliminación de outliers
-
-mean_plus_3std<-mean_area+3*std_area
-print(mean_plus_3std)
-
-##Eliminación de outliers por área
-
-df_test_1<- df_test_1[df_test_1$area_def <= 1000, ]
-df_test_1<- df_test_1[df_test_1$area_def >= 30, ]
-
-summary(df_test_1)
 
 hist(df_test_1$area_def, main="Histograma del área", xlab="Área",ylab="Densidad/Frecuencia",col="darkblue", border = ("grey"), breaks=100)
 
@@ -436,20 +417,23 @@ glimpse(df_test_1)
 
 df_test_1$bano_defnum <- as.numeric(df_test_1$bano_def)
 
-hist(df_test_1$bano_defnum, main="Histograma de banos", xlab="Banos",ylab="Densidad/Frecuencia",col="darkblue", border = ("grey"), breaks=2)
+## Media de los datos observados para banos
 
-# Crear una tabla de frecuencias usando la función table para baños
-tabla_frecuencias_banos <- table(df_test_1$bano_defnum)
+NAN2_df_banos <- df_test_1[!is.na(df_test_1$bano_defnum), ]
 
-# Mostrar la tabla de frecuencias
-print(tabla_frecuencias_banos)
+sapply(NAN2_df_banos, function(x) sum(is.na(x)))
 
-summary(df_test_1$bano_defnum)
+mediana_bano<- median(NAN2_df_banos$bano_defnum)
 
-tabla <- table(df_test_1$bano_def)
-print(tabla)
+print(mediana_bano)
 
-skim(df_test_1)
+
+df_test_1 <- df_test_1 %>%
+  mutate(bano_defnum = replace_na(bano_defnum, 3),)
+
+summary(df_test_1)
+sapply(df_test_1, function(x) sum(is.na(x)))
+
 
 ## Determinación de nueva variable "Tiene baño social"
 ## Si el #de baños es mayor al número de habitaciones, hay baño social
@@ -474,6 +458,23 @@ df_test_1 <- df_test_1 %>%
 df_test_1 %>%
   count(deposito_def)
 
+## Media de los datos observados para depositos
+
+NAN2_df_dep <- df_test_1[!is.na(df_test_1$deposito_def), ]
+
+sapply(NAN2_df_dep, function(x) sum(is.na(x)))
+
+mediana_dep<- median(NAN2_df_dep$deposito_def)
+
+print(mediana_dep)
+
+
+df_test_1 <- df_test_1 %>%
+  mutate(deposito_def = replace_na(deposito_def, 0),)
+
+sapply(df_test_1, function(x) sum(is.na(x)))
+
+
 #Creación de variable si es nuevo o no
 
 df_test_1 <- df_test_1 %>% 
@@ -483,12 +484,21 @@ df_test_1 <- df_test_1 %>%
 df_test_1 %>%
   count(estado_construccion)
 
+df_test_1 <- df_test_1 %>%
+  mutate(estado_construccion = replace_na(estado_construccion, 0),)
+
+
+## Si es remodelado o no
+
 df_test_1 <- df_test_1 %>% 
   mutate(remodelado=str_detect(df_test_1$description,"[a-z]emodela[db][a-z]")) %>% 
   mutate(estado_remodelado=ifelse((remodelado==TRUE),1,0))
 
 df_test_1 %>%
   count(estado_remodelado)
+
+df_test_1 <- df_test_1 %>%
+  mutate(estado_remodelado = replace_na(estado_remodelado, 0),)
 
 ## Creación de variable Balcón o Terraza
 
@@ -500,15 +510,29 @@ df_test_1 <- df_test_1 %>%
 df_test_1 %>%
   count(terraza_balcon_def)
 
-## Merge de la base con variables externas
+sapply(df_test_1, function(x) sum(is.na(x)))
 
-setwd("C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores")
+df_test_1 <- df_test_1 %>%
+  mutate(terraza_balcon_def = replace_na(terraza_balcon_def, 0),)
+
+sapply(df_test_1, function(x) sum(is.na(x)))
+
+
+##Ajustando variables
+
+## Baño social
+
+df_train_1 <- df_train_1 %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
+                                                            bano_social == "no"~ 0))
+
+df_test_1 <- df_test_1 %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
+                                                          bano_social == "no"~ 0))
 
 
 #Importando las bases de datos 
 
-save(df_train_1,file = "C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores/train_clean.Rda")
-save(df_test_1,file = "C:/Users/dj.farfan10.UANDES/Documents/GitHub/Taller-2/stores/test_clean.Rda")
+save(df_train_1,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/train_clean.Rda")
+save(df_test_1,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/test_clean.Rda")
 
 
 
