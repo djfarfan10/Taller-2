@@ -263,6 +263,7 @@ class(df_train_merge2$delitos_total_2019)
 class(df_test_merge2$delitos_total_2019)
 
 
+
 ## Guardando las bases de datos finales 
 
 save(df_train_merge2,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/train_def1.Rda")
