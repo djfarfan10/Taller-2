@@ -9,21 +9,13 @@
   
   load("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/train_def1.Rda")
   load("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/test_def1.Rda")
-  train<-df_train_merged
-  test<-df_test_merged
+  train<-df_train_merge2
+  test<-df_test_merge2
   
-  train<-train %>% select(-geometry,-geo_point_2d)
+  train<-train %>% select(-geometry)
   test<-test %>% select(-geometry)
   
-  #Valoración de baño social
-  
-  train <- train %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
-                                                    bano_social == "no"~ 0))
-  
-  
-  test <- test %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
-                                                    bano_social == "no"~ 0))
-                      
+ 
   #Cambio a variable doublede la distancia de TransMilenio
   
   train$distancia_TM<-as.double(train$distancia_TM)
@@ -66,11 +58,11 @@
     step_zv(all_predictors()) %>% 
     step_normalize(area_def,distancia_TM,dist_TM2,densidad_urbana)
   
-  recipe3 <- recipe(formula = price ~ estrato +area_def+parqueadero+deposito_def, data = train) %>% 
+  recipe3 <- recipe(formula = lnprice ~ estrato+area_def+parqueadero+deposito_def+distancia_TM+dist_TM2+densidad_urbana+cod_upz, data = train) %>% 
     step_novel(all_nominal_predictors()) %>% 
     step_dummy(all_nominal_predictors()) %>% 
     step_zv(all_predictors()) %>% 
-    step_normalize(area_def)
+    step_normalize(area_def,distancia_TM,dist_TM2,densidad_urbana)
   
   
    
@@ -141,3 +133,7 @@
   
   augment(modelo_03_fit, new_data = train) %>%
     rmse(truth = price, estimate = .pred)
+  
+  test<-test %>% mutate(price=predict(modelo_02_fit, test))
+  
+  
