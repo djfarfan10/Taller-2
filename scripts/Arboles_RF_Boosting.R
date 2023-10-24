@@ -94,6 +94,11 @@ sapply(train, function(x) sum(is.na(x)))
 train$area2 <- train$area_def*train$area_def
 train$distanciaTM2 <- train$distancia_TM*train$distancia_TM
 
+test$area2 <- test$area_def*test$area_def
+test$distanciaTM2 <- test$distancia_TM*test$distancia_TM
+
+test$lnprice <- log(test$price)
+
 rec_1 <- recipe(lnprice ~ property_type_2 + bedrooms + parqueadero + area_def+area2+ distancia_TM + distanciaTM2+ bano_defnum  + deposito_def + estrato + UPZ + delitos_total_2019, data = train) %>%
   step_novel(all_nominal_predictors()) %>% 
   step_dummy(all_nominal_predictors()) %>% 
@@ -169,4 +174,62 @@ tune_boost <- tune_grid(
   metrics = metric_set(mae)
 )
 
+# Utilizar 'select_best' para seleccionar el mejor valor.
+best_parms_tree <- select_best(tune_tree, metric = "mae")
+best_parms_tree
 
+# Utilizar 'select_best' para seleccionar el mejor valor.
+best_parms_rf<- select_best(tune_rf, metric = "mae")
+best_parms_rf
+
+# Utilizar 'select_best' para seleccionar el mejor valor.
+best_parms_boost <- select_best(tune_boost, metric = "mae")
+best_parms_boost
+
+
+
+
+# Finalizar el flujo de trabajo 'workflow' con el mejor valor de parametros
+tree_final <- finalize_workflow(workflow_1.1, best_parms_tree)
+
+# Ajustar el modelo  utilizando los datos de entrenamiento
+tree_final_fit <- fit(tree_final, data = train)
+
+
+# Finalizar el flujo de trabajo 'workflow' con el mejor valor de parametros
+rf_final <- finalize_workflow(workflow_1.2, best_parms_rf)
+
+# Ajustar el modelo utilizando los datos de entrenamiento
+rf_final_fit <- fit(rf_final, data = train)
+
+
+# Finalizar el flujo de trabajo 'workflow' con el mejor valor de parametros
+boost_final <- finalize_workflow(workflow_1.3, best_parms_boost)
+
+# Ajustar el modelo  utilizando los datos de entrenamiento
+boost_final_fit <- fit(boost_final, data = train)
+
+test <- subset(test, select = -price)
+test <- subset(test, select = -lnprice)
+
+augment(tree_final_fit, new_data = train) %>%
+  mae(truth = lnprice, estimate = .pred)
+
+augment(rf_final_fit, new_data = test) %>%
+  mae(truth = lnprice, estimate = .pred)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+augment(boost_final_fit, new_data = test) %>%
+  mae(truth = lnprice, estimate = .pred)
