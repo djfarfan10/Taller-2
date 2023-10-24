@@ -270,3 +270,9 @@ save(df_train_merge2,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores
 save(df_test_merge2,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/test_def1.Rda")
 
 
+load("train_def1.Rda")
+
+df_train_merge2$lnprice <- log(df_train_merge2$price)
+
+save(df_train_merge2,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/train_def1.Rda")
+
