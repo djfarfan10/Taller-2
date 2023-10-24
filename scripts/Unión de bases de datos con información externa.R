@@ -1,6 +1,6 @@
 ## Merge de la base con variables externas
 
-setwd("C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores")
+setwd("d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores")
 
 library (pacman)
 p_load(tidyverse, # Manipular dataframes
@@ -31,14 +31,14 @@ load("Train-TM-Est-UPL-UPZ.Rda")
 df_train <- train
 
 df_train<- df_train %>%
-  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL,cod_loc,Localidad,cod_upz,UPZ,densidad_urbana,geo_point_2d, geometry)
+  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL,cod_loc,Localidad,cod_upz,UPZ,densidad_urbana)
 
 ## Selección de variables externas para test
 
 df_test <- test
 
 df_test<- df_test %>%
-  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL,cod_loc,Localidad,cod_upz,UPZ,densidad_urbana,geo_point_2d, geometry)
+  select(property_id, distancia_TM, estrato, color, CODIGO_UPL, UPL,cod_loc,Localidad,cod_upz,UPZ,densidad_urbana)
 
 sapply(df_test, function(x) sum(is.na(x))) ##49 NAN por UPZ
 
@@ -85,17 +85,115 @@ sapply(df_train_merged, function(x) sum(is.na(x)))
 sapply(df_test_1, function(x) sum(is.na(x)))
 
 
-##Eliminación de NANs de UPZ de TEST y train
+##Eliminación de NANs de UPZ para train
 
 ##Train
 
 df_train_merged<- df_train_merged[!is.na(df_train_merged$UPZ), ]
 sapply(df_train_merged, function(x) sum(is.na(x)))
 
-##Test
+##Para Test se imputan valores faltantes de UPZ
 
-df_test_merged<- df_test_merged[!is.na(df_test_merged$UPZ), ]
+class(df_test_merged$cod_upz)
+
+## Faltantes para UPZ
+
+NAN2_dftest_UPZ <- df_test_merged[!is.na(df_test_merged$UPZ), ]
+
+sapply(NAN2_dftest_UPZ, function(x) sum(is.na(x)))
+
+mediana_UPZ<- median(NAN2_dftest_UPZ$UPZ)
+
+print(mediana_UPZ)
+
+
+df_test_merged <- df_test_merged %>%
+  mutate(UPZ = replace_na(UPZ, "EL REFUGIO"),)
+
 sapply(df_test_merged, function(x) sum(is.na(x)))
+
+
+## Faltantes para cod_upz
+
+NAN2_dftest_codUPZ <- df_test_merged[!is.na(df_test_merged$cod_upz), ]
+
+sapply(NAN2_dftest_codUPZ, function(x) sum(is.na(x)))
+
+mediana_codUPZ<- median(NAN2_dftest_codUPZ$cod_upz)
+
+print(mediana_codUPZ)
+
+
+df_test_merged <- df_test_merged %>%
+  mutate(cod_upz = replace_na(cod_upz, "90"),)
+
+sapply(df_test_merged, function(x) sum(is.na(x)))
+
+## Para localidad
+
+NAN2_dftest_loc <- df_test_merged[!is.na(df_test_merged$Localidad), ]
+
+sapply(NAN2_dftest_loc, function(x) sum(is.na(x)))
+
+mediana_loc<- median(NAN2_dftest_loc$Localidad)
+
+print(mediana_loc)
+
+
+df_test_merged <- df_test_merged %>%
+  mutate(Localidad = replace_na(Localidad, "CHAPINERO"),)
+
+sapply(df_test_merged, function(x) sum(is.na(x)))
+
+## Para cod localidad
+
+
+NAN2_dftest_cloc <- df_test_merged[!is.na(df_test_merged$cod_loc), ]
+
+sapply(NAN2_dftest_cloc, function(x) sum(is.na(x)))
+
+mediana_cloc<- median(NAN2_dftest_cloc$cod_loc)
+
+print(mediana_cloc)
+
+class(df_test_merged$cod_loc)
+
+
+df_test_merged <- df_test_merged %>%
+  mutate(cod_loc = replace_na(cod_loc, 2),)
+
+sapply(df_test_merged, function(x) sum(is.na(x)))
+
+
+##Verificando datos
+
+df_train_merged$distancia_TM<-as.double(df_train_merged$distancia_TM)
+df_test_merged$distancia_TM<-as.double(df_test_merged$distancia_TM)
+
+variables_categoricas <- c("parqueadero",
+                           "bano_social",
+                           "deposito_def",
+                           "estado_construccion",
+                           "estado_remodelado", 
+                           "terraza_balcon_def",
+                           "estrato",
+                           "cod_loc",
+                           "cod_upz")
+
+df_train_merged <- df_train_merged %>% 
+  mutate_at(variables_categoricas, as.factor)
+
+df_test_merged <- df_test_merged %>% 
+  mutate_at(variables_categoricas, as.factor)
+
+## Creación de variable de seguridad: Delitos totales por UPZ
+
+install.packages("readxl")
+
+
+df_seguridad<- read.csv("seguridad.csv")
+
+
 
 
 ## Guardando las bases de datos finales 

@@ -487,6 +487,9 @@ df_test_1 %>%
 df_test_1 <- df_test_1 %>%
   mutate(estado_construccion = replace_na(estado_construccion, 0),)
 
+
+## Si es remodelado o no
+
 df_test_1 <- df_test_1 %>% 
   mutate(remodelado=str_detect(df_test_1$description,"[a-z]emodela[db][a-z]")) %>% 
   mutate(estado_remodelado=ifelse((remodelado==TRUE),1,0))
@@ -520,72 +523,16 @@ sapply(df_test_1, function(x) sum(is.na(x)))
 ## Baño social
 
 df_train_1 <- df_train_1 %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
-                                                  bano_social == "no"~ 0))
-
-df_test_1 <- df_test_1 %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
                                                             bano_social == "no"~ 0))
 
-## Parqueadero
+df_test_1 <- df_test_1 %>% mutate(bano_social = case_when(bano_social == "si"~ 1,
+                                                          bano_social == "no"~ 0))
 
-df_train_1 <- df_train_1 %>% mutate(parqueadero = case_when(parqueadero == "si"~ 1,
-                                                            parqueadero == "no"~ 0))
-
-df_test_1 <- df_test_1 %>% mutate(parqueadero = case_when(parqueadero == "si"~ 1,
-                                                          parqueadero == "no"~ 0))
-
-## Deposito final
-
-df_train_1 <- df_train_1 %>% mutate(deposito_def = case_when(deposito_def == "si"~ 1,
-                                                            deposito_def == "no"~ 0))
-
-df_test_1 <- df_test_1 %>% mutate(deposito_def = case_when(deposito_def == "si"~ 1,
-                                                           deposito_def == "no"~ 0))
-
-
-##Estado construcción
-
-df_train_1 <- df_train_1 %>% mutate(estado_construccion = case_when(estado_construccion == "si"~ 1,
-                                                                    estado_construccion == "no"~ 0))
-
-df_test_1 <- df_test_1 %>% mutate(estado_construccion = case_when(estado_construccion == "si"~ 1,
-                                                           estado_construccion == "no"~ 0))
-
-
-##Estado remodelado
-
-df_train_1 <- df_train_1 %>% mutate(estado_remodelado = case_when(estado_remodelado == "si"~ 1,
-                                                                  estado_remodelado == "no"~ 0))
-
-df_test_1 <- df_test_1 %>% mutate(estado_remodelado = case_when(estado_remodelado == "si"~ 1,
-                                                                estado_remodelado == "no"~ 0))
-
-##Balcón o terraza
-
-df_train_1 <- df_train_1 %>% mutate(terraza_balcon_def = case_when(terraza_balcon_def == "si"~ 1,
-                                                                   terraza_balcon_def == "no"~ 0))
-
-df_test_1 <- df_test_1 %>% mutate(estado_remodelado = case_when(terraza_balcon_def == "si"~ 1,
-                                                                terraza_balcon_def == "no"~ 0))
-
-
-#Definición de variables categóricas
-variables_categoricas <- c("parqueadero",
-                           "bano_social",
-                           "deposito_def",
-                           "estado_construccion",
-                           "estado_remodelado", 
-                           "terraza_balcon_def",
-                           "estrato",
-                           "cod_loc",
-                           "cod_upz")
-
-df_train_1 <- df_train_1 %>% mutate_at(variables_categoricas, as.factor)
-df_test_1 <- df_test_1 %>% mutate_at(variables_categoricas, as.factor)
 
 #Importando las bases de datos 
 
-save(df_train_1,file = "C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/train_clean.Rda")
-save(df_test_1,file = "C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/test_clean.Rda")
+save(df_train_1,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/train_clean.Rda")
+save(df_test_1,file = "d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/test_clean.Rda")
 
 
 
