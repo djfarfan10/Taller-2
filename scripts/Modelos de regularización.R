@@ -66,27 +66,27 @@
   
   #Lasso
   
-  recipe1 <- recipe(formula = lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz, data = train) %>% 
+  recipe1 <- recipe(formula = price ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz+delitos_total_2019, data = train) %>% 
     step_novel(all_nominal_predictors()) %>% 
     step_dummy(all_nominal_predictors()) %>% 
     step_zv(all_predictors()) %>% 
-    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum)
+    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum,delitos_total_2019)
   
   #Ridge
   
-  recipe2 <- recipe(formula = lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz, data = train) %>% 
+  recipe2 <- recipe(formula = price ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz+delitos_total_2019, data = train) %>% 
     step_novel(all_nominal_predictors()) %>% 
     step_dummy(all_nominal_predictors()) %>% 
     step_zv(all_predictors()) %>% 
-    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum)
+    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum,delitos_total_2019)
   
   #Elastic Net
   
-  recipe3 <- recipe(formula = lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz, data = train) %>% 
+  recipe3 <- recipe(formula = price ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz+delitos_total_2019, data = train) %>% 
     step_novel(all_nominal_predictors()) %>% 
     step_dummy(all_nominal_predictors()) %>% 
     step_zv(all_predictors()) %>% 
-    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum)
+    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum,delitos_total_2019)
   
     #Especificación de los modelos
   
@@ -162,21 +162,37 @@
     mae(truth = price, estimate = .pred)
   
   augment(modelo_03_fit, new_data = train) %>%
-    mae(truth = lnprice, estimate = .pred)
+    mae(truth = price, estimate = .pred)
   
-  pred_price<-deframe(predict(modelo_03_fit, test))
+  pred_price1<-deframe(predict(modelo_01_fit, test))
+  pred_price2<-deframe(predict(modelo_02_fit, test))
+  pred_price3<-deframe(predict(modelo_03_fit, test))
   
-  pred_price<-exp(pred_price)
+  test$price<-pred_price1
+  test_cargue1<-data.frame(test$property_id,test$price)
+  colnames(test_cargue1)[1]<-"property_id"
+  colnames(test_cargue1)[2]<-"price"
   
-  test$price<-pred_price
+  write.csv(test_cargue1,"C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Archivos a Kaggle/Lasso.csv", row.names = FALSE)
   
-  test_cargue<-data.frame(test$property_id,test$price)
+  test$price<-pred_price2
+  test_cargue2<-data.frame(test$property_id,test$price)
+  colnames(test_cargue2)[1]<-"property_id"
+  colnames(test_cargue2)[2]<-"price"
   
-  colnames(test_cargue)[1]<-"property_id"
-  colnames(test_cargue)[2]<-"price"
+  write.csv(test_cargue2,"C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Archivos a Kaggle/Ridge.csv", row.names = FALSE)
   
-  summary(test_cargue$price)
+  test$price<-pred_price3
+  test_cargue3<-data.frame(test$property_id,test$price)
+  colnames(test_cargue3)[1]<-"property_id"
+  colnames(test_cargue3)[2]<-"price"
   
-  write.csv(test_cargue,"C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Archivos a Kaggle/Predicción_06.csv", row.names = FALSE)
+  write.csv(test_cargue3,"C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Archivos a Kaggle/Ridge.csv", row.names = FALSE) 
+  
+  summary(pred_price1)
+  summary(pred_price2)
+  summary(pred_price3)
+  
+ 
   
   
