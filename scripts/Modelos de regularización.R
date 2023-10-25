@@ -15,7 +15,25 @@
   train<-train %>% select(-geometry)
   test<-test %>% select(-geometry)
   
- 
+  train<-train %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+  test<-test %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+  
+  train<-train %>% mutate(digitos_area = floor(log10(area_def)) + 1)
+  test<-test %>% mutate(digitos_area = floor(log10(area_def)) + 1)
+  
+  train<-train %>% mutate(area_corr = case_when(digitos_area == 4 ~ area_def/10,
+                                                digitos_area == 5 ~ area_def/100,
+                                                digitos_area == 6 ~ area_def/1000,
+                                                digitos_area < 4 ~ area_def))
+  
+  test<-test %>% mutate(area_corr = case_when(digitos_area == 4 ~ area_def/10,
+                                              digitos_area == 5 ~ area_def/100,
+                                              digitos_area == 6 ~ area_def/1000,
+                                              digitos_area < 4 ~ area_def))
+  
+  train<-train %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+  test<-test %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+  
   #Cambio a variable doublede la distancia de TransMilenio
   
   train$distancia_TM<-as.double(train$distancia_TM)
@@ -46,29 +64,42 @@
   
   #Recetas
   
-  recipe1 <- recipe(formula = price ~ estrato +area_def+parqueadero+deposito_def+distancia_TM, data = train) %>% 
-      step_novel(all_nominal_predictors()) %>% 
-      step_dummy(all_nominal_predictors()) %>% 
-      step_zv(all_predictors()) %>% 
-      step_normalize(area_def,distancia_TM)
+  #Lasso
   
-  recipe2 <- recipe(formula = price ~ estrato+area_def+parqueadero+deposito_def+distancia_TM+dist_TM2+densidad_urbana+cod_upz, data = train) %>% 
+  recipe1 <- recipe(formula = lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz, data = train) %>% 
     step_novel(all_nominal_predictors()) %>% 
     step_dummy(all_nominal_predictors()) %>% 
     step_zv(all_predictors()) %>% 
-    step_normalize(area_def,distancia_TM,dist_TM2,densidad_urbana)
+    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum)
   
-  recipe3 <- recipe(formula = lnprice ~ estrato+area_def+parqueadero+deposito_def+distancia_TM+dist_TM2+densidad_urbana+cod_upz, data = train) %>% 
+  #Ridge
+  
+  recipe2 <- recipe(formula = lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz, data = train) %>% 
     step_novel(all_nominal_predictors()) %>% 
     step_dummy(all_nominal_predictors()) %>% 
     step_zv(all_predictors()) %>% 
-    step_normalize(area_def,distancia_TM,dist_TM2,densidad_urbana)
+    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum)
+  
+  #Elastic Net
+  
+  recipe3 <- recipe(formula = lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz, data = train) %>% 
+    step_novel(all_nominal_predictors()) %>% 
+    step_dummy(all_nominal_predictors()) %>% 
+    step_zv(all_predictors()) %>% 
+    step_normalize(area_corr,distancia_TM,dist_TM2,bano_defnum)
+  
+    #Especificación de los modelos
   
   
-   
-  #Especificación de los modelos
+  specification1 <- linear_reg(mixture = 1, penalty = tune()) %>%
+    set_mode("regression") %>%
+    set_engine("glmnet")
   
-  specification <- linear_reg(mixture = 0, penalty = 0) %>%
+  specification2 <- linear_reg(mixture = 0, penalty = tune()) %>%
+    set_mode("regression") %>%
+    set_engine("glmnet")
+  
+  specification3 <- linear_reg(mixture = 0.5, penalty = tune()) %>%
     set_mode("regression") %>%
     set_engine("glmnet")
   
@@ -76,15 +107,15 @@
   
     workf1 <- workflow() %>%
       add_recipe(recipe1) %>%
-      add_model(specification)
+      add_model(specification1)
   
     workf2 <- workflow() %>%
       add_recipe(recipe2) %>%
-      add_model(specification)
+      add_model(specification2)
   
     workf3 <- workflow() %>%
       add_recipe(recipe3) %>%
-      add_model(specification)
+      add_model(specification3)
   
   #Optimización de lambda
     
@@ -117,23 +148,35 @@
   
   modelo_01 <- finalize_workflow(workf1, best_penalty1)
   modelo_02 <- finalize_workflow(workf2, best_penalty2)
-  modelo_03 <- finalize_workflow(workf3, best_penalty2)
+  modelo_03 <- finalize_workflow(workf3, best_penalty3)
   
   modelo_01_fit <- fit(modelo_01, data = train)
   modelo_02_fit <- fit(modelo_02, data = train)
   modelo_03_fit <- fit(modelo_03, data = train)
   
-  #predict(modelo_01_fit, train)
-  
+
   augment(modelo_01_fit, new_data = train) %>%
-    rmse(truth = price, estimate = .pred)
+    mae(truth = price, estimate = .pred)
 
   augment(modelo_02_fit, new_data = train) %>%
-    rmse(truth = price, estimate = .pred)
+    mae(truth = price, estimate = .pred)
   
   augment(modelo_03_fit, new_data = train) %>%
-    rmse(truth = price, estimate = .pred)
+    mae(truth = lnprice, estimate = .pred)
   
-  test<-test %>% mutate(price=predict(modelo_02_fit, test))
+  pred_price<-deframe(predict(modelo_03_fit, test))
+  
+  pred_price<-exp(pred_price)
+  
+  test$price<-pred_price
+  
+  test_cargue<-data.frame(test$property_id,test$price)
+  
+  colnames(test_cargue)[1]<-"property_id"
+  colnames(test_cargue)[2]<-"price"
+  
+  summary(test_cargue$price)
+  
+  write.csv(test_cargue,"C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/Archivos a Kaggle/Predicción_06.csv", row.names = FALSE)
   
   
