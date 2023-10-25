@@ -89,6 +89,100 @@ y_hat_arbol1 <- predict(tree,train)
 p_load(MLmetrics)
 MAE(y_pred=y_hat_arbol1,y_true=log(train$price))
 
+
+exp(0.2694797)
+
+MAPE(y_pred=y_hat_arbol1,y_true=log(train$price))
+
+
+########### Árbol 2
+
+train$bedrooms2 <- train$bedrooms*train$bedrooms
+
+
+test$bedrooms2 <- test$bedrooms*test$bedrooms
+
+
+ls(train)
+
+tree3 <- train(
+  lnprice ~ property_type_2 + bedrooms + parqueadero + 
+    area_def+area2+ distancia_TM + distanciaTM2+ bano_defnum  + 
+    deposito_def + estrato + UPZ + delitos_total_2019 +bano_social+
+    terraza_balcon_def+estado_remodelado+bedrooms2,
+  data=train,
+  method = "rpart",
+  metric="MAE",
+  trControl = fitControl,
+  tuneLength=15
+)
+
+sapply(test, function(x) sum(is.na(x)))
+
+tree3
+
+# Predecir el precio
+test$tree3_logprice <- predict(tree3,test)
+test <- test %>% 
+  st_drop_geometry()  %>%
+  mutate(pt_1=exp(tree3_logprice)) %>% 
+  mutate(pt_1=round(pt_1,-5))
+int_tree3 <- test %>%
+  ungroup() %>% 
+  select(property_id,pt_1) %>% 
+  rename(price=pt_1)
+
+write.csv(int_tree1,"../stores/arbol3.csv",row.names = FALSE)
+
+# MAE / MAPE
+y_hat_arbol2 <- predict(tree2,train)
+p_load(MLmetrics)
+MAE(y_pred=y_hat_arbol2,y_true=log(train$price))
+
+#0.2807288
+exp(0.2694797)
+#1.324094
+MAPE(y_pred=y_hat_arbol1,y_true=log(train$price))
+
+
+
+
+ls(train)
+
+tree4 <- train(
+  lnprice ~ property_type_2 + bedrooms + parqueadero + 
+    area_def+area2+ distancia_TM + distanciaTM2+ bano_defnum  + 
+    deposito_def + estrato + UPZ + delitos_total_2019 +bano_social+
+    terraza_balcon_def+estado_remodelado+bedrooms2,
+  data=train,
+  method = "rpart",
+  metric="MAE",
+  trControl = fitControl,
+  tuneLength=15
+)
+
+sapply(test, function(x) sum(is.na(x)))
+
+tree3
+
+# Predecir el precio
+test$tree3_logprice <- predict(tree3,test)
+test <- test %>% 
+  st_drop_geometry()  %>%
+  mutate(pt_1=exp(tree3_logprice)) %>% 
+  mutate(pt_1=round(pt_1,-5))
+int_tree3 <- test %>%
+  ungroup() %>% 
+  select(property_id,pt_1) %>% 
+  rename(price=pt_1)
+
+write.csv(int_tree1,"../stores/arbol3.csv",row.names = FALSE)
+
+# MAE / MAPE
+y_hat_arbol2 <- predict(tree2,train)
+p_load(MLmetrics)
+MAE(y_pred=y_hat_arbol2,y_true=log(train$price))
+
 #0.2807288
 exp(0.2694797)
 #1.324094
