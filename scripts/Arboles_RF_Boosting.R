@@ -2,7 +2,7 @@
 #                          Arboles, RF y Boosting                              #
 ################################################################################
 
-setwd("d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores")
+setwd("C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores")
 
 # Cargar pacman (contiene la función p_load)
 library(pacman) 
@@ -21,12 +21,40 @@ p_load(tidyverse, # Manipular dataframes
        rattle, # Interfaz gráfica para el modelado de datos
        spatialsample) # Muestreo espacial para modelos de aprendizaje automático
 
+p_load("stargazer","glmnet")
 
 load("train_def1.Rda")
 load("test_def1.Rda")
 
 train<- df_train_merge2
 test<- df_test_merge2
+
+
+## Ajuste de área
+
+train<-train %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+test<-test %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+
+train<-train %>% mutate(digitos_area = floor(log10(area_def)) + 1)
+test<-test %>% mutate(digitos_area = floor(log10(area_def)) + 1)
+
+train<-train %>% mutate(area_corr = case_when(digitos_area == 4 ~ area_def/10,
+                                              digitos_area == 5 ~ area_def/100,
+                                              digitos_area == 6 ~ area_def/1000,
+                                              digitos_area < 4 ~ area_def))
+
+test<-test %>% mutate(area_corr = case_when(digitos_area == 4 ~ area_def/10,
+                                            digitos_area == 5 ~ area_def/100,
+                                            digitos_area == 6 ~ area_def/1000,
+                                            digitos_area < 4 ~ area_def))
+
+train<-train %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+test<-test %>% group_by(cod_upz) %>% mutate(area_medianaUPZ = median(area_def))
+
+#Cambio a variable doublede la distancia de TransMilenio
+
+train$distancia_TM<-as.double(train$distancia_TM)
+test$distancia_TM<-as.double(test$distancia_TM)
 
 ########### Especificación de modelos
 
@@ -91,18 +119,21 @@ boost_spec <- boost_tree(
 
 sapply(train, function(x) sum(is.na(x)))
 
-train$area2 <- train$area_def*train$area_def
+train$area2 <- train$area_corr*train$area_corr
 train$distanciaTM2 <- train$distancia_TM*train$distancia_TM
 
-test$area2 <- test$area_def*test$area_def
+test$area2 <- test$area_corr*test$area_corr
 test$distanciaTM2 <- test$distancia_TM*test$distancia_TM
 
 test$lnprice <- log(test$price)
 
-rec_1 <- recipe(lnprice ~ property_type_2 + bedrooms + parqueadero + area_def+area2+ distancia_TM + distanciaTM2+ bano_defnum  + deposito_def + estrato + UPZ + delitos_total_2019, data = train) %>%
+ls(train)
+
+rec_1 <- recipe(formula = lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+distanciaTM2+cod_upz+delitos_total_2019, data = train) %>% 
   step_novel(all_nominal_predictors()) %>% 
   step_dummy(all_nominal_predictors()) %>% 
-  step_zv(all_predictors()) 
+  step_zv(all_predictors()) %>% 
+  step_normalize(area_corr,distancia_TM,distanciaTM2,bano_defnum,delitos_total_2019)
 
 ###### Creación de fluos de trabajo
 
@@ -209,27 +240,44 @@ boost_final <- finalize_workflow(workflow_1.3, best_parms_boost)
 # Ajustar el modelo  utilizando los datos de entrenamiento
 boost_final_fit <- fit(boost_final, data = train)
 
-test <- subset(test, select = -price)
-test <- subset(test, select = -lnprice)
+
+
 
 augment(tree_final_fit, new_data = train) %>%
   mae(truth = lnprice, estimate = .pred)
 
-augment(rf_final_fit, new_data = test) %>%
+augment(rf_final_fit, new_data = train) %>%
+  mae(truth = lnprice, estimate = .pred)
+
+augment(boost_final_fit, new_data = train) %>%
   mae(truth = lnprice, estimate = .pred)
 
 
+pred_price1<-deframe(predict(tree_final_fit, test))
+pred_price2<-deframe(predict(rf_final_fit, test))
+pred_price3<-deframe(predict(boost_final_fit, test))
+
+test$price<-pred_price1
+test_cargue1<-data.frame(test$property_id,test$price)
+colnames(test_cargue1)[1]<-"property_id"
+colnames(test_cargue1)[2]<-"price"
+
+test$price<-pred_price2
+test_cargue2<-data.frame(test$property_id,test$price)
+colnames(test_cargue2)[1]<-"property_id"
+colnames(test_cargue2)[2]<-"price"
+
+test$price<-pred_price3
+test_cargue3<-data.frame(test$property_id,test$price)
+colnames(test_cargue3)[1]<-"property_id"
+colnames(test_cargue3)[2]<-"price"
+
+test_cargue1$price <- exp(test_cargue1$price)
+test_cargue2$price <- exp(test_cargue2$price)
+test_cargue3$price <- exp(test_cargue3$price)
+
+write.csv(test_cargue1,"C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/arbol4.csv", row.names = FALSE)
+write.csv(test_cargue2,"C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/RF1.csv", row.names = FALSE)
+write.csv(test_cargue3,"C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/Boosting1.csv", row.names = FALSE)
 
 
-
-
-
-
-
-
-
-
-
-
-augment(boost_final_fit, new_data = test) %>%
-  mae(truth = lnprice, estimate = .pred)
