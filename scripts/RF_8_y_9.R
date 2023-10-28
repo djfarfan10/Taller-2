@@ -135,3 +135,38 @@ colnames(test_cargue9)[2]<-"price"
 write.csv(test_cargue9,"C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/Random_Forest_9.csv", row.names = FALSE)
 
 
+######## RF 10
+
+fitControl<-trainControl(method ="cv",
+                         number=20)
+
+tree_ranger10 <- train(
+  price ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz+delitos_total_2019+distancia_parque+distancia_universidades+distancia_CAI+distancia_hospitales+
+    distancia_school+dist_parque2+dist_universidades2+dist_CAI2+dist_hospitales2+dist_school2,
+  data=train,
+  method = "ranger",
+  trControl = fitControl,
+  tuneGrid=expand.grid(
+    mtry = 30,
+    splitrule = "variance",
+    min.node.size = 3)
+)
+
+print(tree_ranger10)
+
+price_test<-predict(tree_ranger10, newdata = test)
+
+
+summary(price_test)
+
+test$price<-price_test
+
+test_cargue10<-data.frame(test$property_id,test$price)
+
+colnames(test_cargue10)[1]<-"property_id"
+colnames(test_cargue10)[2]<-"price"
+
+write.csv(test_cargue10,"C:/Users/dj.farfan10/Documents/GitHub/Taller-2/stores/Random_Forest_10.csv", row.names = FALSE)
+
+
+
