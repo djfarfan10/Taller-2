@@ -299,4 +299,39 @@ colnames(test_cargueboosted3)[2]<-"price"
 write.csv(test_cargueboosted3,"d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/Boosting_3.csv", row.names = FALSE)
 
 
+##RF 12
+
+fitControl<-trainControl(method ="cv",
+                         number=11)
+
+tree_ranger12 <- train(
+  lnprice ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz+delitos_total_2019+distancia_parque+distancia_universidades+distancia_CAI+distancia_hospitales+
+    distancia_school+dist_parque2+dist_universidades2+dist_CAI2+dist_hospitales2+dist_school2,
+  data=train,
+  method = "ranger",
+  trControl = fitControl,
+  tuneGrid=expand.grid(
+    mtry = 20,
+    splitrule = "variance",
+    min.node.size = 3)
+)
+
+print(tree_ranger12)
+
+price_test<-predict(tree_ranger12, newdata = test)
+
+
+summary(test_cargue12)
+
+test$price<-price_test
+
+test_cargue12<-data.frame(test$property_id,test$price)
+
+colnames(test_cargue12)[1]<-"property_id"
+colnames(test_cargue12)[2]<-"price"
+
+test_cargue12$price<- exp(test_cargue12$price)
+
+write.csv(test_cargue12,"d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/Random_Forest_12.csv", row.names = FALSE)
+
 
