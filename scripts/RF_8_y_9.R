@@ -265,6 +265,38 @@ write.csv(test_cargue11,"d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/Ran
 
 
 
+######## Boosting
+
+set.seed(123)
+p_load("bst")
+
+tree_boosted <- train(
+  price ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+parqueadero+distancia_TM+dist_TM2+distancia_parque+distancia_universidades+distancia_CAI+distancia_hospitales+
+    dist_parque2+dist_universidades2+dist_CAI2+dist_hospitales2,
+  data=train,
+  method = "bstTree",
+  trControl = fitControl,
+  tuneGrid=expand.grid(
+    mstop = c(400,500,600), #Boosting Iterations (M)
+    maxdepth = c(1,2,3), # Max Tree Depth (d)
+    nu = c(0.01,0.001)) # Shrinkage (lambda)
+)
+
+print(tree_boosted)
+
+price_test<-predict(tree_boosted, newdata = test)
+
+
+summary(price_test)
+
+test$price<-price_test
+
+test_cargueboosted3<-data.frame(test$property_id,test$price)
+
+colnames(test_cargueboosted3)[1]<-"property_id"
+colnames(test_cargueboosted3)[2]<-"price"
+
+write.csv(test_cargueboosted3,"d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/Boosting_3.csv", row.names = FALSE)
 
 
 
