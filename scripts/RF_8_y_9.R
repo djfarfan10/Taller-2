@@ -335,3 +335,73 @@ test_cargue12$price<- exp(test_cargue12$price)
 write.csv(test_cargue12,"d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/Random_Forest_12.csv", row.names = FALSE)
 
 
+##RF 13
+
+fitControl<-trainControl(method ="cv",
+                         number=5)
+
+tree_ranger13 <- train(
+  price ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz+delitos_total_2019+distancia_parque+distancia_universidades+distancia_CAI+distancia_hospitales+
+    distancia_school+dist_parque2+dist_universidades2+dist_CAI2+dist_hospitales2+dist_school2,
+  data=train,
+  method = "ranger",
+  trControl = fitControl,
+  tuneGrid=expand.grid(
+    mtry = 50,
+    splitrule = "variance",
+    min.node.size = 5)
+)
+
+print(tree_ranger13)
+
+price_test<-predict(tree_ranger13, newdata = test)
+
+
+summary(test_cargue12)
+
+test$price<-price_test
+
+test_cargue13<-data.frame(test$property_id,test$price)
+
+colnames(test_cargue13)[1]<-"property_id"
+colnames(test_cargue13)[2]<-"price"
+
+
+write.csv(test_cargue13,"d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/Random_Forest_13.csv", row.names = FALSE)
+
+
+
+##RF 14
+
+fitControl<-trainControl(method ="cv",
+                         number=20)
+
+tree_ranger14 <- train(
+  price ~ estrato+area_corr+property_type_2+bedrooms+bano_defnum+terraza_balcon_def+parqueadero+deposito_def+distancia_TM+dist_TM2+cod_upz+delitos_total_2019+distancia_parque+distancia_universidades+distancia_CAI+distancia_hospitales+
+    distancia_school+dist_parque2+dist_universidades2+dist_CAI2+dist_hospitales2+dist_school2,
+  data=train,
+  method = "ranger",
+  trControl = fitControl,
+  tuneGrid=expand.grid(
+    mtry = 50,
+    splitrule = "variance",
+    min.node.size = 3)
+)
+
+print(tree_ranger14)
+
+price_test<-predict(tree_ranger14, newdata = test)
+
+
+summary(test_cargue14)
+
+test$price<-price_test
+
+test_cargue14<-data.frame(test$property_id,test$price)
+
+colnames(test_cargue13)[1]<-"property_id"
+colnames(test_cargue13)[2]<-"price"
+
+
+write.csv(test_cargue14,"d:/Javier/Desktop/UNIANDES/Big Data/Taller-2/stores/Random_Forest_14.csv", row.names = FALSE)
+
