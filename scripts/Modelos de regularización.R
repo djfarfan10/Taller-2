@@ -9,8 +9,6 @@
   
   load("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/train_def1.Rda")
   load("C:/Users/afdia/OneDrive - Universidad de los Andes/Maestría en Economía Aplicada/Big Data y Machine Learning/Repositorios-GitHub/Taller-2/stores/test_def1.Rda")
-  train<-df_train_merge2
-  test<-df_test_merge2
   
   train<-train %>% select(-geometry)
   test<-test %>% select(-geometry)
